@@ -1,17 +1,20 @@
 <template>
   <v-layout>
     <v-layout column justify-center align-center>
-      <v-row v-if="connected">
-        <span :style="`color: ${this.color}`">{{name}}</span>
-      </v-row>
       <v-row v-if="!connected">
         <v-text-field label="名前を入力" v-model="name"></v-text-field>
       </v-row>
       <v-row v-if="!connected">
-        <v-color-picker hide-canvas v-model="color"></v-color-picker>
+        <v-color-picker show-swatches v-model="color"></v-color-picker>
+      </v-row>
+      <v-row v-if="!connected">
+        <v-text-field label="ルームid" v-model="room"></v-text-field>
       </v-row>
       <v-row v-if="!connected">
         <v-btn color="primary" @click="connect">接続</v-btn>
+      </v-row>
+      <v-row v-if="connected">
+        <span :style="`color: ${this.color}`">{{name}}</span>
       </v-row>
       <v-row v-if="connected">
         <v-btn color="error" @click="disconnect">切断</v-btn>
@@ -53,11 +56,14 @@
       </div>
     </v-layout>
     <v-layout>
-      <v-list v-if="connected">
-        <v-list-item v-for="(user, key) in users" :key="key">
-          <span :style="`color: ${user.color}`">{{user.name}}</span>
-        </v-list-item>
-      </v-list>
+      <v-card v-if="connected">
+        メンバー一覧
+        <v-list>
+          <v-list-item v-for="(user, key) in users" :key="key">
+            <span :style="`color: ${user.color}`">{{user.name}}</span>
+          </v-list-item>
+        </v-list>
+      </v-card>
     </v-layout>
   </v-layout>
 </template>
@@ -86,7 +92,8 @@ export default {
       name: "",
       color: "",
       connected: false,
-      users: {}
+      users: {},
+      room: ""
     };
   },
   computed: {
@@ -171,7 +178,8 @@ export default {
       this.socket = io();
       this.socket.emit("user-join", {
         name: this.name,
-        color: this.color
+        color: this.color,
+        room: this.room
       });
       this.socket.on("cell-changed", cells => {
         this.cells = cells;

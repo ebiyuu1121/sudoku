@@ -44,32 +44,52 @@ let cells = JSON.parse(
 	            inputBy : "",
 	            color : ""
             }))));
+let rooms = {};
 
 function socketStart(server) {
 	const io = require('socket.io').listen(server);
 
 	io.on('connection', socket => {
-		// 接続されたクライアントのidをコンソールに表示する
-		console.log('id: ' + socket.id + ' is connected');
-
 		// クライアントから送信があった場合のイベントを作成する
 		socket.on('user-join', user => {
-			users[socket.id] = user;
-			console.log(user.name + ' has joined');
-			io.emit('user-update', users);
-			io.emit('cell-changed', cells);
-		})
+			socket.room = user.room;
+			console.log(user.name + ' has joined to ' + socket.room);
+			socket.join(socket.room);
+
+			if (!rooms[socket.room]) {
+				rooms[socket.room] = {
+					cells : JSON.parse(
+					    JSON.stringify(
+					        new Array(9).fill(
+					            new Array(9).fill({
+						            value : "",
+						            isProblem : false,
+						            inputBy : "",
+						            color : ""
+					            })))),
+					users : {
+						[socket.id] : user
+					}
+				}
+			} else {
+				rooms[socket.room].users[socket.id] = user;
+			}
+
+			io.to(socket.room).emit('user-update', rooms[socket.room].users);
+			io.to(socket.room).emit('cell-changed', rooms[socket.room].cells);
+		});
 
 		socket.on('cell-changed', newCells => {
-			cells = newCells;
-			socket.broadcast.emit('cell-changed', cells);
-		})
+			rooms[socket.room].cells = newCells;
+			socket.to(socket.room).broadcast.emit('cell-changed', newCells);
+		});
 
 		socket.on('user-leave', dic => {
-			delete users[socket.id];
-			socket.broadcast.emit('user-update', users);
-		})
-	})
+			console.log(rooms[socket.room].users[socket.id].name + ' has left');
+			delete rooms[socket.room].users[socket.id];
+			socket.to(socket.room).broadcast.emit('user-update', rooms[socket.room].users);
+		});
+	});
 }
 
-start()
+start();
