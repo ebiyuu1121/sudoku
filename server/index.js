@@ -47,7 +47,7 @@ let cells = JSON.parse(
 let rooms = {};
 
 function socketStart(server) {
-	const io = require('socket.io').listen(server);
+	const io = require('socket.io').listen(server, {path : "/sudoku"});
 
 	io.on('connection', socket => {
 		// クライアントから送信があった場合のイベントを作成する
