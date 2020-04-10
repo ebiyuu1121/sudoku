@@ -175,7 +175,7 @@ export default {
     connect() {
       this.connected = true;
 
-      this.socket = io({ path: "/sudoku" });
+      this.socket = io({ path: "/sudoku/socket.io" });
       this.socket.emit("user-join", {
         name: this.name,
         color: this.color,
