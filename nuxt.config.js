@@ -1,6 +1,6 @@
-const colors = require('vuetify/es5/util/colors').default
+const colors = require('vuetify/es5/util/colors').default;
 
-               module.exports = {
+module.exports = {
 	mode : 'universal',
 	/*
   ** Headers of the page
@@ -82,5 +82,8 @@ const colors = require('vuetify/es5/util/colors').default
     */
 		extend(config, ctx) {
 		}
+	},
+	router : {
+		base : "/sudoku/"
 	}
 }
