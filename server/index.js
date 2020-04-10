@@ -80,14 +80,18 @@ function socketStart(server) {
 		});
 
 		socket.on('cell-changed', newCells => {
-			rooms[socket.room].cells = newCells;
-			socket.to(socket.room).broadcast.emit('cell-changed', newCells);
+			if (rooms[socket.room]) {
+				rooms[socket.room].cells = newCells;
+				socket.to(socket.room).broadcast.emit('cell-changed', newCells);
+			}
 		});
 
 		socket.on('user-leave', dic => {
-			console.log(rooms[socket.room].users[socket.id].name + ' has left');
-			delete rooms[socket.room].users[socket.id];
-			socket.to(socket.room).broadcast.emit('user-update', rooms[socket.room].users);
+			if (rooms[socket.room] && rooms[socket.room].users[socket.id]) {
+				console.log(rooms[socket.room].users[socket.id].name + ' has left');
+				delete rooms[socket.room].users[socket.id];
+				socket.to(socket.room).broadcast.emit('user-update', rooms[socket.room].users);
+			}
 		});
 	});
 }
